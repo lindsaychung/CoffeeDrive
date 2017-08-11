@@ -4,8 +4,12 @@
 import { Navigation } from 'react-native-navigation';
 import Drawer from './pages/Drawer';
 import Main from './pages/Main';
+import Authentication from './pages/Authentication';
+import Tabs from './partials/common/Tabs';
 
 export function registerScreens() {
     Navigation.registerComponent('Main', () => Main);
     Navigation.registerComponent('Drawer', () => Drawer);
+    Navigation.registerComponent('Authentication', () => Authentication);
+    Navigation.registerComponent('Tabs', () => Tabs);
 }
