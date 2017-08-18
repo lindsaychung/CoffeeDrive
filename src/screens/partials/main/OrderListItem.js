@@ -9,9 +9,16 @@ export default class OrderListItem extends React.Component {
 
     constructor (props) {
         super(props)
+        console.log(this.props)
     }
 
     render () {
+        if (this.props.order === undefined)
+            return (
+                <View style={{marginTop: 50}}>
+
+                </View>
+            )
         return (
             <TouchableOpacity style={styles.container}>
                 <View>

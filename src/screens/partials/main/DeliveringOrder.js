@@ -3,35 +3,13 @@
  */
 import React from 'react';
 import { Text, View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import Button from 'react-native-button';
 
-export default class OrderListItem extends React.Component {
+export default class DeliveringOrder extends React.Component {
 
     constructor (props) {
         super(props)
         console.log(this.props)
-    }
-
-    componentWillMount () {
-        if (this.props.order !== undefined)
-            switch(this.props.order.order_status) {
-                case 1:
-                    this.setState({
-                        orderStatus: "Order Accepted"
-                    })
-                    break
-                case 2:
-                    this.setState({
-                        orderStatus: "Coffee Preparing"
-                    })
-                    break
-                case 3:
-                    this.setState({
-                        orderStatus: "Coffee Ready"
-                    })
-                    break
-            }
     }
 
     render () {
@@ -58,14 +36,14 @@ export default class OrderListItem extends React.Component {
                         <Text style={{color: 'green', fontSize: 12, width: 30}}>From</Text>
                         <View style={{marginHorizontal: 5, flex: 1}}>
                             <Text style={{fontWeight: 'bold'}}>{this.props.order.shop.name}</Text>
-                            <Text>{this.props.order.shop.place.formatted_address}</Text>
+                            <Text numberOfLines={1}>{this.props.order.shop.place.formatted_address}</Text>
                         </View>
                         <Text style={{color: 'grey', fontSize: 12}}>2.5 km</Text>
                     </View>
                     <View style={styles.target}>
                         <Text style={{color: '#d6cd07', fontSize: 12, width: 30}}>To</Text>
                         <View style={{marginHorizontal: 5, flex: 1}}>
-                            <Text numberOfLines={1} style={{fontWeight: 'bold'}}>{this.props.order.customer.recipient.place.formatted_address}</Text>
+                            <Text style={{fontWeight: 'bold'}}>{this.props.order.customer.recipient.place.formatted_address}</Text>
                         </View>
                         <Text style={{color: 'grey', fontSize: 12}}>0.5 km</Text>
                     </View>
@@ -74,11 +52,11 @@ export default class OrderListItem extends React.Component {
                     </View>
                 </View>
                 <View style={styles.takeOrder}>
-                    <Text style={{alignSelf: 'center'}}>{this.state.orderStatus}</Text>
+                    <Text style={{alignSelf: 'center'}}>Order on the way</Text>
                     <Button style={styles.button}
                             containerStyle={{borderRadius: 5, overflow: 'hidden'}}
-                            onPress={this.props.pickOrder}>
-                        Order Picked
+                            onPress={this.props.deliverOrder}>
+                        Order Delivered
                     </Button>
                 </View>
 
@@ -106,10 +84,10 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     button: {
-        backgroundColor: "#dcb626",
+        backgroundColor: "green",
         color: "white",
         padding: 8,
         fontSize: 14,
-        width: 100
+        width: 140
     }
 })

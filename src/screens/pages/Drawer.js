@@ -57,7 +57,7 @@ export default class Account extends React.Component {
     showAuthenticate = () => {
         if (this.state.isLogin === false)
             this.props.navigator.push({
-                screen: 'Authenticate',
+                screen: 'Authentication',
                 title: 'User Authentication',
                 animated: true,
                 animationType: 'fade',

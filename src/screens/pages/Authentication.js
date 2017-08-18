@@ -40,6 +40,8 @@ export default class Authenticate extends React.Component{
                     Global.userID = responseJson.id
                     Global.userAccessToken = responseJson.access_token
                     Global.username = this.state.username
+                    Global.displayName = responseJson.displayName
+                    Global.avatar_url = responseJson.avatar_url
                     Toast.show('Login Success!')
                     if (this.props.didLogin)
                         this.props.didLogin()

@@ -6,7 +6,10 @@ import { Text, View, StyleSheet, FlatList, ActivityIndicator, Alert} from 'react
 import Global from '../../Global';
 import Tabs from '../partials/common/Tabs'
 import OrderListItem from '../partials/main/OrderListItem';
+import Spinner from 'react-native-loading-spinner-overlay'
+import Toast from 'react-native-root-toast';
 import PickingOrders from '../partials/main/PickingOrders';
+import DeliveringOrder from '../partials/main/DeliveringOrder';
 
 export default class Main extends React.Component {
 
@@ -15,7 +18,8 @@ export default class Main extends React.Component {
         this.state = {
             isLoading: true,
             isLogin: false,
-            refreshing: false
+            refreshing: false,
+            processingOrder: false,
         }
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
@@ -32,7 +36,107 @@ export default class Main extends React.Component {
     }
 
     _takeOrder = (order) => {
-        Alert.alert("you just clicked Take")
+        this.setState({
+            processingOrder: true
+        }, () => {
+            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+                + order.orderInfo._id, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + Global.userAccessToken,
+                    'Content-Type': 'application/json',
+                    'X-Kii-AppID': Global.appID,
+                    'X-Kii-AppKey': Global.appKey
+                },
+                body: JSON.stringify({
+                    driver: {
+                        id: Global.userID,
+                        display_name: Global.username,
+                        avatar_url: Global.avatar_url
+                    },
+                    order_status: 1,
+                    timestamp_order_status_1: new Date()
+                })
+            })
+                .then((response) => {
+                    console.log(response)
+                    return response.json()
+                })
+                .then((responseJson) => {
+                    Toast.show('Order Taken')
+                    this.setState({
+                        processingOrder: false
+                    }, () => {
+                        this._getNewOrders()
+                    })
+                })
+        })
+    }
+
+    _pickOrder = (order) => {
+        this.setState({
+            processingOrder: true
+        }, () => {
+            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+                + order.pickingOrderInfo._id, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + Global.userAccessToken,
+                    'Content-Type': 'application/json',
+                    'X-Kii-AppID': Global.appID,
+                    'X-Kii-AppKey': Global.appKey
+                },
+                body: JSON.stringify({
+                    order_status: 4,
+                    timestamp_order_status_4: new Date()
+                })
+            })
+                .then((response) => {
+                    console.log(response)
+                    return response.json()
+                })
+                .then((responseJson) => {
+                    Toast.show('Order Picked')
+                    this.setState({
+                        processingOrder: false
+                    }, () => {
+                        this._getPickingOrders()
+                    })
+                })
+        })
+    }
+
+    _deliverOrder = (order) => {
+        this.setState({
+            processingOrder: true
+        }, () => {
+            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+                + order.deliveringOrderInfo._id, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + Global.userAccessToken,
+                    'Content-Type': 'application/json',
+                    'X-Kii-AppID': Global.appID,
+                    'X-Kii-AppKey': Global.appKey
+                },
+                body: JSON.stringify({
+                    order_status: 5,
+                    timestamp_order_status_5: new Date()
+                })
+            })
+                .then((response) => {
+                    console.log(response)
+                    return response.json()
+                })
+                .then((responseJson) => {
+                    Toast.show('Order Delivered')
+                    this.setState({
+                        processingOrder: false
+                    }, () => {
+                        this._getPickingOrders()
+                    })
+                })
+        })
     }
 
     _refresh = () => {
@@ -48,7 +152,36 @@ export default class Main extends React.Component {
         });
     }
 
+    _refreshPickingOrders = () => {
+        return new Promise((resolve) => {
+            this.setState({
+                refreshing: true
+            })
+            this._getPickingOrders(() => {
+                this.setState({
+                    refreshing: false
+                }, resolve())
+            })
+        });
+    }
+
+    _refreshDeliveringOrders = () => {
+        return new Promise((resolve) => {
+            this.setState({
+                refreshing: true
+            })
+            this._getDeliveringOrders(() => {
+                this.setState({
+                    refreshing: false
+                }, resolve())
+            })
+        });
+    }
+
     _getNewOrders = (cb) => {
+        this.setState({
+            isLoading: true
+        })
         fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
             method: 'POST',
             headers: {
@@ -62,7 +195,7 @@ export default class Main extends React.Component {
                         "field": "order_status",
                         "value": 0
                     },
-                    "orderBy": "timestamp_order_placed",
+                    "orderBy": "timestamp_order_status_0",
                     "descending": true
                 },
                 "bestEffortLimit": 10
@@ -73,10 +206,115 @@ export default class Main extends React.Component {
                 console.log(responseJson)
                 this.setState({
                     isLoading: false,
-                    orderList: responseJson.results.map(order => {
+                    orderList: responseJson.results.map((order, index) => {
                         return {
-                            key: order['_id'],
+                            key: index,
                             orderInfo: order
+                        }
+                    })
+                }, cb)
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    _getDeliveringOrders = (cb) => {
+        this.setState({
+            isLoading: true
+        })
+        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + Global.userAccessToken,
+                'Content-Type': 'application/vnd.kii.QueryRequest+json',
+            },
+            body: JSON.stringify({
+                "bucketQuery": {
+                    "clause": {
+                        "type": "and",
+                        "clauses": [
+                            {
+                                "type": "eq",
+                                "field": "order_status",
+                                "value": 4
+                            },
+                            {
+                                "type": 'eq',
+                                "field": "driver.id",
+                                "value": Global.userID
+                            }
+                        ]
+                    },
+                    "orderBy": "timestamp_order_status_4",
+                    "descending": true
+                },
+                "bestEffortLimit": 10
+            })
+        })
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log(responseJson)
+                this.setState({
+                    isLoading: false,
+                    orderList: responseJson.results.map((order, index) => {
+                        return {
+                            key: index,
+                            deliveringOrderInfo: order
+                        }
+                    })
+                }, cb)
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    _getPickingOrders = (cb) => {
+        this.setState({
+            isLoading: true
+        })
+        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + Global.userAccessToken,
+                'Content-Type': 'application/vnd.kii.QueryRequest+json',
+            },
+            body: JSON.stringify({
+                "bucketQuery": {
+                    "clause": {
+                        "type": "and",
+                        "clauses": [
+                            {
+                                "type": "range",
+                                "field": "order_status",
+                                "upperLimit": 3,
+                                "upperIncluded": true,
+                                "lowerLimit": 1,
+                                "lowerIncluded": true
+                            },
+                            {
+                                "type": 'eq',
+                                "field": "driver.id",
+                                "value": Global.userID
+                            }
+                        ]
+                    },
+                    "orderBy": "order_status",
+                    "descending": true
+                },
+                "bestEffortLimit": 10
+            })
+        })
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log(responseJson)
+                this.setState({
+                    isLoading: false,
+                    orderList: responseJson.results.map((order, index) => {
+                        return {
+                            key: index,
+                            pickingOrderInfo: order
                         }
                     })
                 }, cb)
@@ -94,6 +332,8 @@ export default class Main extends React.Component {
                 passProps: {
                     didLogin: () => {
                         this._getNewOrders()
+                        this._getPickingOrders()
+                        this._getDeliveringOrders()
                     }
                 }, // simple serializable object that will pass as props to the modal (optional)
                 navigatorStyle: {}, // override the navigator style for the screen, see "Styling the navigator" below (optional)
@@ -105,6 +345,8 @@ export default class Main extends React.Component {
     render () {
         return (
             <View style={styles.container}>
+                <Spinner visible={this.state.processingOrder} size="small" textContent={"Processing Order..."}
+                         textStyle={{color: '#FFF', marginTop: -30, fontSize: 14}} />
                 <Tabs>
                     <View title="New Orders" style={styles.content}>
                         <FlatList
@@ -113,40 +355,31 @@ export default class Main extends React.Component {
                             data={this.state.orderList}
                             renderItem={({item}) => <OrderListItem
                                 order={item.orderInfo}
-                                takeOrder={this._takeOrder}
-                                // onOrderAgainPress={this.goToShop}
-                                // onShopPress={this.goToShop}
-                                // onOrderPress={this.goToOrderInfo}
+                                takeOrder={() => {this._takeOrder(item)}}
                             />}
                         />
                     </View>
                     {/* Second tab */}
                     <View title="Picking" style={styles.content}>
                         <FlatList
-                            onRefresh={this._refresh}
+                            onRefresh={this._refreshPickingOrders}
                             refreshing={this.state.refreshing}
                             data={this.state.orderList}
-                            renderItem={({item}) => <OrderListItem
-                                order={item.orderInfo}
-                                takeOrder={this._takeOrder}
-                                // onOrderAgainPress={this.goToShop}
-                                // onShopPress={this.goToShop}
-                                // onOrderPress={this.goToOrderInfo}
+                            renderItem={({item}) => <PickingOrders
+                                order={item.pickingOrderInfo}
+                                pickOrder={() => {this._pickOrder(item)}}
                             />}
                         />
                     </View>
                     {/* Third tab */}
                     <View title="Delivering" style={styles.content}>
                         <FlatList
-                            onRefresh={this._refresh}
+                            onRefresh={this._refreshDeliveringOrders}
                             refreshing={this.state.refreshing}
                             data={this.state.orderList}
-                            renderItem={({item}) => <OrderListItem
-                                order={item.orderInfo}
-                                takeOrder={this._takeOrder}
-                                // onOrderAgainPress={this.goToShop}
-                                // onShopPress={this.goToShop}
-                                // onOrderPress={this.goToOrderInfo}
+                            renderItem={({item}) => <DeliveringOrder
+                                order={item.deliveringOrderInfo}
+                                deliverOrder={() => {this._deliverOrder(item)}}
                             />}
                         />
                     </View>
