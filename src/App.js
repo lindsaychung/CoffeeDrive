@@ -9,6 +9,7 @@ export default class App {
 
     constructor () {
         this.populateIcons().then(() => {
+            console.disableYellowBox = true;
             this.startApp();
         }).catch((error) => {
             console.error(error);
