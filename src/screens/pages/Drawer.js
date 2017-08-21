@@ -34,7 +34,7 @@ export default class Account extends React.Component {
     }
 
     fetchUser = () => {
-        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/users/'
+        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/users/'
             + Global.userID, {
             method: 'GET',
             headers: {

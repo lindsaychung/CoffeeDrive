@@ -39,7 +39,7 @@ export default class Main extends React.Component {
         this.setState({
             processingOrder: true
         }, () => {
-            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+            fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/objects/'
                 + order.orderInfo._id, {
                 method: 'PATCH',
                 headers: {
@@ -77,7 +77,7 @@ export default class Main extends React.Component {
         this.setState({
             processingOrder: true
         }, () => {
-            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+            fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/objects/'
                 + order.pickingOrderInfo._id, {
                 method: 'PATCH',
                 headers: {
@@ -110,7 +110,7 @@ export default class Main extends React.Component {
         this.setState({
             processingOrder: true
         }, () => {
-            fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/objects/'
+            fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/objects/'
                 + order.deliveringOrderInfo._id, {
                 method: 'PATCH',
                 headers: {
@@ -182,7 +182,7 @@ export default class Main extends React.Component {
         this.setState({
             isLoading: true
         })
-        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
+        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + Global.userAccessToken,
@@ -223,7 +223,7 @@ export default class Main extends React.Component {
         this.setState({
             isLoading: true
         })
-        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
+        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + Global.userAccessToken,
@@ -274,7 +274,7 @@ export default class Main extends React.Component {
         this.setState({
             isLoading: true
         })
-        fetch('https://api-jp.kii.com/api/apps/2c1pzz9jg5dd/buckets/ORDERS/query', {
+        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + Global.userAccessToken,
