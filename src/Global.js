@@ -13,6 +13,7 @@ let Global = {
     // appKey: "5863d5a986e34b279b820fbf0cad2de8",
     // basicAccessToken: "Basic MmMxcHp6OWpnNWRkOjU4NjNkNWE5ODZlMzRiMjc5YjgyMGZiZjBjYWQyZGU4",
     /* dev env end */
+
     avatar_url: "",
     displayName: "",
     userID: "",

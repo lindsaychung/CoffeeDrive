@@ -110,6 +110,6 @@ const styles = StyleSheet.create({
         color: "white",
         padding: 8,
         fontSize: 14,
-        width: 100
+        width: 120
     }
 })
