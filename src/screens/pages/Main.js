@@ -2,7 +2,7 @@
  * Created by leonardean on 11/08/2017.
  */
 import React from 'react';
-import { Text, View, StyleSheet, FlatList, ActivityIndicator, Alert} from 'react-native';
+import {View, StyleSheet, ActivityIndicator, RefreshControl, ScrollView} from 'react-native';
 import Global from '../../Global';
 import Tabs from '../partials/common/Tabs'
 import OrderListItem from '../partials/main/OrderListItem';
@@ -14,12 +14,14 @@ import DeliveringOrder from '../partials/main/DeliveringOrder';
 export default class Main extends React.Component {
 
     constructor (props) {
+        console.log('constructed')
         super (props)
         this.state = {
             isLoading: true,
             isLogin: false,
             refreshing: false,
             processingOrder: false,
+            tabSelected: 0
         }
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
@@ -222,106 +224,108 @@ export default class Main extends React.Component {
     _getDeliveringOrders = (cb) => {
         this.setState({
             isLoading: true
-        })
-        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + Global.userAccessToken,
-                'Content-Type': 'application/vnd.kii.QueryRequest+json',
-            },
-            body: JSON.stringify({
-                "bucketQuery": {
-                    "clause": {
-                        "type": "and",
-                        "clauses": [
-                            {
-                                "type": "eq",
-                                "field": "order_status",
-                                "value": 4
-                            },
-                            {
-                                "type": 'eq',
-                                "field": "driver.id",
-                                "value": Global.userID
-                            }
-                        ]
-                    },
-                    "orderBy": "timestamp_order_status_4",
-                    "descending": true
+        }, () => {
+            fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + Global.userAccessToken,
+                    'Content-Type': 'application/vnd.kii.QueryRequest+json',
                 },
-                "bestEffortLimit": 10
+                body: JSON.stringify({
+                    "bucketQuery": {
+                        "clause": {
+                            "type": "and",
+                            "clauses": [
+                                {
+                                    "type": "eq",
+                                    "field": "order_status",
+                                    "value": 4
+                                },
+                                {
+                                    "type": 'eq',
+                                    "field": "driver.id",
+                                    "value": Global.userID
+                                }
+                            ]
+                        },
+                        "orderBy": "timestamp_order_status_4",
+                        "descending": true
+                    },
+                    "bestEffortLimit": 10
+                })
             })
+                .then((response) => response.json())
+                .then((responseJson) => {
+                    console.log(responseJson)
+                    this.setState({
+                        isLoading: false,
+                        orderList: responseJson.results.map((order, index) => {
+                            return {
+                                key: index,
+                                deliveringOrderInfo: order
+                            }
+                        })
+                    }, cb)
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
         })
-            .then((response) => response.json())
-            .then((responseJson) => {
-                console.log(responseJson)
-                this.setState({
-                    isLoading: false,
-                    orderList: responseJson.results.map((order, index) => {
-                        return {
-                            key: index,
-                            deliveringOrderInfo: order
-                        }
-                    })
-                }, cb)
-            })
-            .catch((error) => {
-                console.error(error);
-            });
     }
 
     _getPickingOrders = (cb) => {
         this.setState({
             isLoading: true
-        })
-        fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + Global.userAccessToken,
-                'Content-Type': 'application/vnd.kii.QueryRequest+json',
-            },
-            body: JSON.stringify({
-                "bucketQuery": {
-                    "clause": {
-                        "type": "and",
-                        "clauses": [
-                            {
-                                "type": "range",
-                                "field": "order_status",
-                                "upperLimit": 3,
-                                "upperIncluded": true,
-                                "lowerLimit": 1,
-                                "lowerIncluded": true
-                            },
-                            {
-                                "type": 'eq',
-                                "field": "driver.id",
-                                "value": Global.userID
-                            }
-                        ]
-                    },
-                    "orderBy": "order_status",
-                    "descending": true
+        }, () => {
+            fetch('https://api-jp.kii.com/api/apps/' + Global.appID + '/buckets/ORDERS/query', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + Global.userAccessToken,
+                    'Content-Type': 'application/vnd.kii.QueryRequest+json',
                 },
-                "bestEffortLimit": 10
+                body: JSON.stringify({
+                    "bucketQuery": {
+                        "clause": {
+                            "type": "and",
+                            "clauses": [
+                                {
+                                    "type": "range",
+                                    "field": "order_status",
+                                    "upperLimit": 3,
+                                    "upperIncluded": true,
+                                    "lowerLimit": 1,
+                                    "lowerIncluded": true
+                                },
+                                {
+                                    "type": 'eq',
+                                    "field": "driver.id",
+                                    "value": Global.userID
+                                }
+                            ]
+                        },
+                        "orderBy": "order_status",
+                        "descending": true
+                    },
+                    "bestEffortLimit": 10
+                })
             })
+                .then((response) => response.json())
+                .then((responseJson) => {
+                    console.log(responseJson)
+                    this.setState({
+                        isLoading: false,
+                        orderList: responseJson.results.map((order, index) => {
+                            return {
+                                key: index,
+                                pickingOrderInfo: order
+                            }
+                        })
+                    }, cb)
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
         })
-            .then((response) => response.json())
-            .then((responseJson) => {
-                console.log(responseJson)
-                this.setState({
-                    isLoading: false,
-                    orderList: responseJson.results.map((order, index) => {
-                        return {
-                            key: index,
-                            pickingOrderInfo: order
-                        }
-                    })
-                }, cb)
-            })
-            .catch((error) => {
-                console.error(error);
-            });
     }
 
     componentWillMount () {
@@ -332,8 +336,8 @@ export default class Main extends React.Component {
                 passProps: {
                     didLogin: () => {
                         this._getNewOrders()
-                        this._getPickingOrders()
-                        this._getDeliveringOrders()
+                        // this._getPickingOrders()
+                        // this._getDeliveringOrders()
                     }
                 }, // simple serializable object that will pass as props to the modal (optional)
                 navigatorStyle: {}, // override the navigator style for the screen, see "Styling the navigator" below (optional)
@@ -342,46 +346,109 @@ export default class Main extends React.Component {
         }
     }
 
+    componentWillUpdate(nextProps, nextState) {
+        if (this.state.tabSelected !== nextState.tabSelected) {
+            if (nextState.tabSelected === 1) {
+                this._getPickingOrders()
+            } else if (nextState.tabSelected === 2) {
+                this._getDeliveringOrders()
+            } else if (nextState.tabSelected === 0) {
+                this._getNewOrders()
+            }
+        }
+    }
+
     render () {
+
+        let newOrderListItems, pickingOrderListItems, deliveringOrderListItems
+        if (Global.userAuthenticated === true && this.state.tabSelected === 0)
+            newOrderListItems = this.state.isLoading === false ? this.state.orderList.map((item, index) => {
+                return (
+                    <OrderListItem
+                        order={item.orderInfo}
+                        takeOrder={() => {this._takeOrder(item)}}
+                    />
+                )
+            }) :
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+        if (Global.userAuthenticated === true && this.state.tabSelected === 1)
+            pickingOrderListItems = this.state.isLoading === false ? this.state.orderList.map((item, index) => {
+                return (
+                    <PickingOrders
+                        order={item.pickingOrderInfo}
+                        pickOrder={() => {this._pickOrder(item)}}
+                    />
+                )
+            }):
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+        if (Global.userAuthenticated === true && this.state.tabSelected === 2)
+            deliveringOrderListItems = this.state.isLoading === false ? this.state.orderList.map((item, index) => {
+                return (
+                    <DeliveringOrder
+                        order={item.deliveringOrderInfo}
+                        deliverOrder={() => {this._deliverOrder(item)}}
+                    />
+                )
+            }):
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+
         return (
             <View style={styles.container}>
                 <Spinner visible={this.state.processingOrder} size="small" textContent={"Processing Order..."}
                          textStyle={{color: '#FFF', marginTop: -30, fontSize: 14}} />
                 <Tabs>
-                    <View title="New Orders" style={styles.content}>
-                        <FlatList
-                            onRefresh={this._refresh}
-                            refreshing={this.state.refreshing}
-                            data={this.state.orderList}
-                            renderItem={({item}) => <OrderListItem
-                                order={item.orderInfo}
-                                takeOrder={() => {this._takeOrder(item)}}
-                            />}
-                        />
+                    <View title="New Orders" style={styles.content} ref={() => {
+                        if (this.state.tabSelected !== 0)
+                            this.setState({
+                                tabSelected:0
+                            })
+                    }}>
+                        <ScrollView refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.refreshing}
+                                onRefresh={this._refresh}
+                            />
+                        }>
+                            {newOrderListItems}
+                        </ScrollView>
                     </View>
                     {/* Second tab */}
-                    <View title="Picking" style={styles.content}>
-                        <FlatList
-                            onRefresh={this._refreshPickingOrders}
-                            refreshing={this.state.refreshing}
-                            data={this.state.orderList}
-                            renderItem={({item}) => <PickingOrders
-                                order={item.pickingOrderInfo}
-                                pickOrder={() => {this._pickOrder(item)}}
-                            />}
-                        />
+                    <View title="Picking" style={styles.content} ref={() => {
+                        if (this.state.tabSelected !== 1)
+                            this.setState({
+                                tabSelected:1
+                            })
+                    }}>
+                        <ScrollView refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.refreshing}
+                                onRefresh={this._refreshPickingOrders}
+                            />
+                        }>
+                            {pickingOrderListItems}
+                        </ScrollView>
                     </View>
                     {/* Third tab */}
-                    <View title="Delivering" style={styles.content}>
-                        <FlatList
-                            onRefresh={this._refreshDeliveringOrders}
-                            refreshing={this.state.refreshing}
-                            data={this.state.orderList}
-                            renderItem={({item}) => <DeliveringOrder
-                                order={item.deliveringOrderInfo}
-                                deliverOrder={() => {this._deliverOrder(item)}}
-                            />}
-                        />
+                    <View title="Delivering" style={styles.content} ref={() => {
+                        if (this.state.tabSelected !== 2)
+                            this.setState({
+                                tabSelected:2
+                            })
+                    }}>
+                        <ScrollView refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.refreshing}
+                                onRefresh={this._refreshDeliveringOrders}
+                            />
+                        }>
+                            {deliveringOrderListItems}
+                        </ScrollView>
                     </View>
 
                 </Tabs>

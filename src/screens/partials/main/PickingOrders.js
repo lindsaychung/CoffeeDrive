@@ -14,6 +14,9 @@ export default class OrderListItem extends React.Component {
     }
 
     componentWillMount () {
+
+
+
         if (this.props.order !== undefined)
             switch(this.props.order.order_status) {
                 case 1:
