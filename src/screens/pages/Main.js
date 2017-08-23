@@ -2,7 +2,7 @@
  * Created by leonardean on 11/08/2017.
  */
 import React from 'react';
-import {View, StyleSheet, ActivityIndicator, RefreshControl, ScrollView} from 'react-native';
+import {View, StyleSheet, ActivityIndicator, RefreshControl, ScrollView, Text, Button} from 'react-native';
 import Global from '../../Global';
 import Tabs from '../partials/common/Tabs'
 import OrderListItem from '../partials/main/OrderListItem';
@@ -341,7 +341,7 @@ export default class Main extends React.Component {
                     }
                 }, // simple serializable object that will pass as props to the modal (optional)
                 navigatorStyle: {}, // override the navigator style for the screen, see "Styling the navigator" below (optional)
-                animationType: 'none' // 'none' / 'slide-up' , appear animation for the modal (optional, default 'slide-up')
+                animationType: 'slide-up' // 'none' / 'slide-up' , appear animation for the modal (optional, default 'slide-up')
             });
         }
     }

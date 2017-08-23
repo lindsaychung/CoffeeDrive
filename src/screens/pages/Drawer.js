@@ -55,21 +55,25 @@ export default class Account extends React.Component {
     }
 
     showAuthenticate = () => {
-        if (this.state.isLogin === false)
-            this.props.navigator.push({
-                screen: 'Authentication',
-                title: 'User Authentication',
-                animated: true,
-                animationType: 'fade',
-                backButtonHidden: true,
+        console.log('authenticate')
+        if (this.state.isLogin === false) {
+            console.log('tobe')
+            this.props.navigator.showModal({
+                screen: "Authentication", // unique ID registered with Navigation.registerScreen
+                title: "User Authentication", // title of the screen as appears in the nav bar (optional)
                 passProps: {
                     didLogin: () => {
                         this.setState({
                             isLogin: true
+                        }, () => {
+                            this.fetchUser()
                         })
                     }
-                },
+                }, // simple serializable object that will pass as props to the modal (optional)
+                navigatorStyle: {}, // override the navigator style for the screen, see "Styling the navigator" below (optional)
+                animationType: 'slide-up' // 'none' / 'slide-up' , appear animation for the modal (optional, default 'slide-up')
             });
+        }
     }
 
     doLogout = () => {
@@ -107,7 +111,6 @@ export default class Account extends React.Component {
                         source={{uri: this.state.userInfo.avatar_url}}
                     />
                     <Text style={{marginVertical: 10}}>{Global.username}</Text>
-                    <Text style={{marginBottom: 10, color: '#a2a2a2', fontSize: 12}}>Balance: $ {this.state.userInfo.balance}</Text>
                 </View>
         } else {
             userInfo =
@@ -133,20 +136,14 @@ export default class Account extends React.Component {
                 </View>
 
                 <View style={{backgroundColor: 'white'}}>
-                    <TouchableOpacity style={styles.row} onPress={this.showAuthenticate}>
-                        <Text style={{alignSelf: 'center', fontSize: 16}}>Delivery Address</Text>
+                    <TouchableOpacity style={styles.row}>
+                        <Text style={{alignSelf: 'center', fontSize: 16}}>Delivery Record</Text>
                         <View style={{justifyContent: 'center'}}>
                             <Icon name="ios-arrow-forward" size={25} color="#a2a2a2"/>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.row}>
-                        <Text style={{alignSelf: 'center', fontSize: 16}}>Stared Shops</Text>
-                        <View style={{justifyContent: 'center'}}>
-                            <Icon name="ios-arrow-forward" size={25} color="#a2a2a2"/>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.row}>
-                        <Text style={{alignSelf: 'center', fontSize: 16}}>My Comments</Text>
+                        <Text style={{alignSelf: 'center', fontSize: 16}}>Comments to Me</Text>
                         <View style={{justifyContent: 'center'}}>
                             <Icon name="ios-arrow-forward" size={25} color="#a2a2a2"/>
                         </View>
