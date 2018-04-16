@@ -55,6 +55,11 @@ react-native start --port 8082
 ```
 Another packager should now be running at port 8082
 Open another terminal window and go to the directory of CoffeeMe
+Open Xcode and change AppDelegate.m on the followngs to use port 8082
+```
+    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8082/index.ios.bundle?platform=ios&dev=false"];
+  //jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+```
 ```
 react-native run-ios --simulator "iPhone 6s"
 ```
